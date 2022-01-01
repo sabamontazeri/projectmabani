@@ -22,6 +22,7 @@ def get_chat_id(update):
     return update['message']['chat']['id']
 
 
+
 def sendMessage(chat_id, text):
     sendData = {
         'chat_id': chat_id,
@@ -58,7 +59,7 @@ def index():
                     sendMessage(chat_id, mokhatab)
         return Response('ok', status=200)
     else:
-        return "<h2>myBot</h2>"
+        return "<h2>myfirstbot</h2>"
 
 
 def write_json(data, filename="contactList.json"):
@@ -76,3 +77,4 @@ try:
 except:
     write_json({})
 app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
+
