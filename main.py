@@ -1,7 +1,6 @@
 url="https://api.telegram.org/bot5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c/"
 import requests
 import json
-import flask
 from flask import Flask
 from flask import request
 import os
@@ -72,9 +71,8 @@ def read_json(filename="contactList.json"):
         data = json.load(target)
     return data
 
-
-
 try:
     read_json()
 except:
     write_json({})
+app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
