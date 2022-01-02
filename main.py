@@ -33,6 +33,15 @@ def sendMessage(chat_id, text):
     response = requests.post(url + 'sendMessage', sendData)
     return response
 
+def button(update: Update, context: CallbackContext) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
+
+    query.edit_message_text(text=f"Selected option: {query.data}")
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -60,6 +69,13 @@ def index():
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
+        query = update.callback_query
+
+        # CallbackQueries need to be answered, even if no notification to the user is needed
+        # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+        query.answer()
+
+        query.edit_message_text(text=f"Selected option: {query.data}")
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
