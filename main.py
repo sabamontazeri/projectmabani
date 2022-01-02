@@ -1,13 +1,39 @@
 url="https://api.telegram.org/bot5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c/"
 import requests
+from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
+from telegram.ext import Updater,CommandHandler,CallbackQueryHandler,CallbackContext
 from flask import Response
+import logging
 import json
 from flask import Flask
 from flask import request
 import os
 
 
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
+
+
+
+def button(update: Update, context: CallbackContext) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
+
+    query.edit_message_text(text=f"Selected option: {query.data}")
+
+
+
+
+
+
 
 
 def get_all_updates():
@@ -40,7 +66,16 @@ def index():
         chat_id = get_chat_id(msg)
         text = msg['message'].get('text', '')
         if text == '/start':
-            sendMessage(chat_id, "khosh Aadid!!")
+            keyboard = [
+                [
+                    InlineKeyboardButton("iran", callback_data='1'),
+                    InlineKeyboardButton("england", callback_data='2'),
+                ],
+                [InlineKeyboardButton("america", callback_data='3')],
+            ]
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            sendMessage(chat_id,reply_markup)
 # new AliBzh 067577
         elif 'new' in text:
             contacts = read_json()
