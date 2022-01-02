@@ -18,6 +18,10 @@ def get_all_updates():
     response = requests.get(url + 'getUpdates')
     return response.json()
 
+def help_command(update: Update, context: CallbackContext) -> None:
+    """Displays info on how to use the bot."""
+    update.message.reply_text("Use /start to test this bot.")
+
 
 def get_last_update(allUpdates):
     return allUpdates['result'][-1]
@@ -45,6 +49,7 @@ def button(update: Update, context: CallbackContext) -> None:
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
+    updater = Updater("TOKEN")
     update = Update.de_json(request.get_json(force=True), bot)
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
@@ -69,7 +74,7 @@ def index():
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
-       
+        updater.dispatcher.add_handler(CommandHandler('help', help_command))
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
