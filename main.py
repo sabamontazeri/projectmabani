@@ -23,8 +23,6 @@ def get_last_update(allUpdates):
     return allUpdates['result'][-1]
 
 
-def get_chat_id():
-    return update.message.chat.id
 
 
 def sendMessage(chat_id, text):
@@ -38,7 +36,7 @@ def sendMessage(chat_id, text):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    update = Update.de_json(request.get_json(force=True), bot)
     chat_id = update.message.chat.id
     msg_id = update.message.message_id
     text = update.message.text.encode('utf-8').decode()
@@ -52,23 +50,6 @@ def index():
           """
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
-# new AliBzh 067577
-    elif 'new' in text:
-        contacts = read_json()
-        username = msg['message']['from']['username']
-        if username not in contacts.keys():
-            contacts[username] = []
-        mokhatab = text.split(maxsplit=1)[1]
-        contacts[username].append(mokhatab)
-        write_json(contacts)
-    elif text == 'list':
-        contacts = read_json()
-        username = msg['message']['from']['username']
-        if username not in contacts.keys():
-            sendMessage(chat_id, 'shoma mokhatabi nadarid')
-        else:
-            for mokhatab in contacts[username]:
-                sendMessage(chat_id, mokhatab)
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
