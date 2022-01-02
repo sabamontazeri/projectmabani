@@ -75,7 +75,7 @@ def index():
             ]
 
             reply_markup = InlineKeyboardMarkup(keyboard)
-            sendMessage(chat_id,reply_markup)
+            msg.reply_text('چه کشوری؟',reply_markup=reply_markup)
 # new AliBzh 067577
         elif 'new' in text:
             contacts = read_json()
