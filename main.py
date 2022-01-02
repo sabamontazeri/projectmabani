@@ -45,11 +45,21 @@ def index():
     # the first time you chat with the bot AKA the welcoming message
     if text == "/start":
         # print the welcoming message
-        bot_welcome = """
-          Welcome to coolAvatar bot, the bot is using the service from http://avatars.adorable.io/ to generate cool looking avatars based on the name you enter so please enter a name and the bot will reply with an avatar for your name.
-          """
+        bot_welcome ='خوش آمدید.سینما کدام کشور را می پسندید؟'
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
+
+        keyboard = [
+            [
+                InlineKeyboardButton("ایران", callback_data='1'),
+                InlineKeyboardButton("انگلستان", callback_data='2'),
+            ],
+            [InlineKeyboardButton("آمریکا", callback_data='3')],
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
