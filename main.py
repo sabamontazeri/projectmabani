@@ -60,7 +60,6 @@ def index():
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
-
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
