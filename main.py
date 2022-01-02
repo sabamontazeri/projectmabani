@@ -1,6 +1,6 @@
 url="https://api.telegram.org/bot5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c/"
 import requests
-from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
+from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup,message
 from telegram.ext import Updater,CommandHandler,CallbackQueryHandler,CallbackContext
 from flask import Response
 import logging
@@ -75,7 +75,7 @@ def index():
             ]
 
             reply_markup = InlineKeyboardMarkup(keyboard)
-            msg.reply_text('چه کشوری؟',reply_markup=reply_markup)
+            message.reply_text('چه کشوری؟',reply_markup=reply_markup)
 # new AliBzh 067577
         elif 'new' in text:
             contacts = read_json()
