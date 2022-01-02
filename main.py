@@ -1,39 +1,17 @@
 url="https://api.telegram.org/bot5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c/"
 import requests
-from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup,message
+from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup,Message,Bot
 from telegram.ext import Updater,CommandHandler,CallbackQueryHandler,CallbackContext
 from flask import Response
-import logging
 import json
 from flask import Flask
 from flask import request
 import os
 
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
+bot=Bot(token=TOKEN)
 
 app = Flask(__name__)
-
-
-
-def button(update: Update, context: CallbackContext) -> None:
-    """Parses the CallbackQuery and updates the message text."""
-    query = update.callback_query
-
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    query.answer()
-
-    query.edit_message_text(text=f"Selected option: {query.data}")
-
-
-
-
-
-
 
 
 def get_all_updates():
@@ -45,9 +23,8 @@ def get_last_update(allUpdates):
     return allUpdates['result'][-1]
 
 
-def get_chat_id(update):
-    return update['message']['chat']['id']
-
+def get_chat_id():
+    return update.message.chat.id
 
 
 def sendMessage(chat_id, text):
@@ -61,38 +38,37 @@ def sendMessage(chat_id, text):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    if request.method == 'POST':
-        msg = request.get_json()
-        chat_id = get_chat_id(msg)
-        text = msg['message'].get('text', '')
-        if text == '/start':
-            keyboard = [
-                [
-                    InlineKeyboardButton("iran", callback_data='1'),
-                    InlineKeyboardButton("england", callback_data='2'),
-                ],
-                [InlineKeyboardButton("america", callback_data='3')],
-            ]
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            message.reply_text('چه کشوری؟',reply_markup=reply_markup)
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    chat_id = update.message.chat.id
+    msg_id = update.message.message_id
+    text = update.message.text.encode('utf-8').decode()
+    # for debugging purposes only
+    print("got text message :", text)
+    # the first time you chat with the bot AKA the welcoming message
+    if text == "/start":
+        # print the welcoming message
+        bot_welcome = """
+          Welcome to coolAvatar bot, the bot is using the service from http://avatars.adorable.io/ to generate cool looking avatars based on the name you enter so please enter a name and the bot will reply with an avatar for your name.
+          """
+        # send the welcoming message
+        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 # new AliBzh 067577
-        elif 'new' in text:
-            contacts = read_json()
-            username = msg['message']['from']['username']
-            if username not in contacts.keys():
-                contacts[username] = []
-            mokhatab = text.split(maxsplit=1)[1]
-            contacts[username].append(mokhatab)
-            write_json(contacts)
-        elif text == 'list':
-            contacts = read_json()
-            username = msg['message']['from']['username']
-            if username not in contacts.keys():
-                sendMessage(chat_id, 'shoma mokhatabi nadarid')
-            else:
-                for mokhatab in contacts[username]:
-                    sendMessage(chat_id, mokhatab)
+    elif 'new' in text:
+        contacts = read_json()
+        username = msg['message']['from']['username']
+        if username not in contacts.keys():
+            contacts[username] = []
+        mokhatab = text.split(maxsplit=1)[1]
+        contacts[username].append(mokhatab)
+        write_json(contacts)
+    elif text == 'list':
+        contacts = read_json()
+        username = msg['message']['from']['username']
+        if username not in contacts.keys():
+            sendMessage(chat_id, 'shoma mokhatabi nadarid')
+        else:
+            for mokhatab in contacts[username]:
+                sendMessage(chat_id, mokhatab)
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
