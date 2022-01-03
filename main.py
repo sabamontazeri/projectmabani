@@ -1,37 +1,28 @@
-url="https://api.telegram.org/bot5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c/"
-import requests
-from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup,Message,Bot
-from telegram.ext import Updater,CommandHandler,CallbackQueryHandler,CallbackContext
-from flask import Response
-import json
-from flask import Flask
-from flask import request
-import os
+import logging
 
-TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
-bot=Bot(token=TOKEN)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update,Bot
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
-app = Flask(__name__)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
-def get_all_updates():
-    response = requests.get(url + 'getUpdates')
-    return response.json()
+def start(update: Update, context: CallbackContext) -> None:
+    """Sends a message with three inline buttons attached."""
+    keyboard = [
+        [
+            InlineKeyboardButton("Option 1", callback_data='1'),
+            InlineKeyboardButton("Option 2", callback_data='2'),
+        ],
+        [InlineKeyboardButton("Option 3", callback_data='3')],
+    ]
 
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
-def get_last_update(allUpdates):
-    return allUpdates['result'][-1]
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
-
-
-
-def sendMessage(chat_id, text):
-    sendData = {
-        'chat_id': chat_id,
-        'text': text,
-    }
-    response = requests.post(url + 'sendMessage', sendData)
-    return response
 
 def button(update: Update, context: CallbackContext) -> None:
     """Parses the CallbackQuery and updates the message text."""
@@ -44,54 +35,28 @@ def button(update: Update, context: CallbackContext) -> None:
     query.edit_message_text(text=f"Selected option: {query.data}")
 
 
+def help_command(update: Update, context: CallbackContext) -> None:
+    """Displays info on how to use the bot."""
+    update.message.reply_text("Use /start to test this bot.")
+
+TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
+bot=Bot(token=TOKEN)
+def main() -> None:
+    """Run the bot."""
+    # Create the Updater and pass it your bot's token.
+    updater = Updater(TOKEN)
+
+    updater.dispatcher.add_handler(CommandHandler('start', start))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CommandHandler('help', help_command))
+
+    # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT
+    updater.idle()
 
 
-
-@app.route('/', methods=['POST', 'GET'])
-def index():
-    update = Update.de_json(request.get_json(force=True), bot)
-    chat_id = update.message.chat.id
-    msg_id = update.message.message_id
-    text = update.message.text.encode('utf-8').decode()
-    # for debugging purposes only
-    print("got text message :", text)
-    # the first time you chat with the bot AKA the welcoming message
-    if text == "/start":
-        # print the welcoming message
-        bot_welcome ='خوش آمدید.سینما کدام کشور را می پسندید؟'
-        # send the welcoming message
-        bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
-        keyboard = [
-            [
-                InlineKeyboardButton("ایران", callback_data='1'),
-                InlineKeyboardButton("انگلستان", callback_data='2'),
-            ],
-            [InlineKeyboardButton("آمریکا", callback_data='3')],
-        ]
-
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
-    elif text=='ایران':
-        bot.sendMessage(chat_id=chat_id, text='فهمیدم', reply_to_message_id=msg_id)
-
-        return Response('ok', status=200)
-    else:
-        return "<h2>myfirstbot</h2>"
-
-
-def write_json(data, filename="contactList.json"):
-    with open(filename, 'w') as target:
-        json.dump(data, target, indent=4, ensure_ascii=False)
-
-
-def read_json(filename="contactList.json"):
-    with open(filename, 'r') as target:
-        data = json.load(target)
-    return data
-
-try:
-    read_json()
-except:
-    write_json({})
-app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
+if __name__ == '__main__':
+    main()
