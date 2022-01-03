@@ -74,6 +74,10 @@ def index():
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
+        query = Update.callback_query
+        query.answer()
+
+        query.edit_message_text(text=f"Selected option: {query.data}")
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
