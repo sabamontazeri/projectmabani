@@ -26,19 +26,8 @@ def help_command(update: Update, context: CallbackContext) -> None:
 def get_last_update(allUpdates):
     return allUpdates['result'][-1]
 
-def start(update: Update, context: CallbackContext) -> None:
 
-    keyboard = [
-        [
-            InlineKeyboardButton("ایران", callback_data='1'),
-            InlineKeyboardButton("انگلستان", callback_data='2'),
-        ],
-        [InlineKeyboardButton("آمریکا", callback_data='3')],
-    ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
 
 def sendMessage(chat_id, text):
     sendData = {
@@ -69,11 +58,22 @@ def index():
     print("got text message :", text)
     # the first time you chat with the bot AKA the welcoming message
     if text == "/start":
-        bot_welcome = 'خوش آمدید.سینما کدام کشور را می پسندید؟'
+        # print the welcoming message
+        bot_welcome ='خوش آمدید.سینما کدام کشور را می پسندید؟'
         # send the welcoming message
         bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
-        updater.dispatcher.add_handler(CommandHandler('start', start))
-        updater.dispatcher.add_handler(CallbackQueryHandler(button))
+
+        keyboard = [
+            [
+                InlineKeyboardButton("ایران", callback_data='1'),
+                InlineKeyboardButton("انگلستان", callback_data='2'),
+            ],
+            [InlineKeyboardButton("آمریکا", callback_data='3')],
+        ]
+
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
