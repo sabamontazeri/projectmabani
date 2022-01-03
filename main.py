@@ -13,15 +13,15 @@ def start(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
         [
-            InlineKeyboardButton("Option 1", callback_data='1'),
-            InlineKeyboardButton("Option 2", callback_data='2'),
+            InlineKeyboardButton("ایران", callback_data='iran'),
+            InlineKeyboardButton("آمریکا", callback_data='USA'),
         ],
-        [InlineKeyboardButton("Option 3", callback_data='3')],
+        [InlineKeyboardButton("انگلستان", callback_data='england')],
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+    update.message.reply_text('به فیلم چه کشوری علاقه دارید؟', reply_markup=reply_markup)
 
 
 def button(update: Update, context: CallbackContext) -> None:
@@ -32,7 +32,7 @@ def button(update: Update, context: CallbackContext) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
-    query.edit_message_text(text=f"Selected option: {query.data}")
+    query.edit_message_text(text=f" هستید{query.data}شما علاقه مند به")
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
