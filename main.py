@@ -23,6 +23,18 @@ def start(update: Update, context: CallbackContext) -> None:
 
     update.message.reply_text('به فیلم چه کشوری علاقه دارید؟', reply_markup=reply_markup)
 
+def theme(update: Update, context: CallbackContext) -> None:
+    keyboard = [
+        [
+            InlineKeyboardButton("کمدی", callback_data='comedy'),
+            InlineKeyboardButton("اکشن", callback_data='action'),
+        ],
+        [InlineKeyboardButton("ترسناک", callback_data='horror'),InlineKeyboardButton("درام",callback_data='dramatic')],
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
 def button(update: Update, context: CallbackContext) -> None:
     """Parses the CallbackQuery and updates the message text."""
@@ -32,7 +44,7 @@ def button(update: Update, context: CallbackContext) -> None:
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
-    query.edit_message_text(text=f" هستید{query.data}شما علاقه مند به")
+    query.edit_message_text(text=f" you are interested in:{query.data}")
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
@@ -47,6 +59,8 @@ def main() -> None:
     updater = Updater(TOKEN)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CommandHandler('theme', theme))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
