@@ -70,16 +70,10 @@ def index():
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
-        button()
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
-        query = Update.callback_query
+        button()
 
-        # CallbackQueries need to be answered, even if no notification to the user is needed
-        # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-        query.answer()
-
-        query.edit_message_text(text=f"Selected option: {query.data}")
         return Response('ok', status=200)
     else:
         return "<h2>myfirstbot</h2>"
