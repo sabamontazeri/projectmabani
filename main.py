@@ -72,7 +72,8 @@ def index():
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         update.message.reply_text('لطفا انتخاب کنید', reply_markup=reply_markup)
-        button()
+    elif text=='ایران':
+        bot.sendMessage(chat_id=chat_id, text='فهمیدم', reply_to_message_id=msg_id)
 
         return Response('ok', status=200)
     else:
