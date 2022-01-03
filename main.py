@@ -1,5 +1,5 @@
 import logging
-
+from flask import request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update,Bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
@@ -57,6 +57,11 @@ def main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
     updater = Updater(TOKEN)
+    updating = Update.de_json(request.get_json(force=True), bot)
+    bot_welcome = f'{help}خوش آمدید.این ربات برای پیدا کردن فیلم مورد علاقه شما طراحی شده است. برای دیدن دستورالعمل این ربات از دستور مقابل استفاده کنید: '
+    chat_id = updating.message.chat.id
+    msg_id = updating.message.message_id
+    bot.sendMessage(chat_id=chat_id, text=bot_welcome, reply_to_message_id=msg_id)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
