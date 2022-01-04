@@ -70,15 +70,13 @@ def main() -> None:
     updater.dispatcher.add_handler(CommandHandler('theme', theme))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
+
+    updater.start_polling()
+    updater.idle()
     return Response('ok', status=200)
 
 
     # Start the Bot
-    updater.start_polling()
-
-    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT
-    updater.idle()
 
 
 app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
