@@ -1,12 +1,11 @@
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update,Bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
-from flask import Flask,Response
-import os
 
-app = Flask(__name__)
-
-
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -56,7 +55,6 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
-@app.route('/', methods=['POST'])
 def main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
@@ -68,12 +66,13 @@ def main() -> None:
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
-    updater.start_polling()
-    updater.idle()
-    return Response('ok', status=200)
-
-
     # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT
+    updater.idle()
+
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
+    main()
