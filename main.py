@@ -56,7 +56,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
@@ -75,5 +75,5 @@ def main() -> None:
 
     # Start the Bot
 
-
-app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
+if __name__ == '__main__':
+    app.run(host="0.0.0.0",port=int(os.environ.get('PORT',5000)))
