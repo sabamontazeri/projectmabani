@@ -2,6 +2,7 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update,Bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
 
+details=[]
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
@@ -48,7 +49,8 @@ def button(update: Update, context: CallbackContext) -> None:
 
     query.edit_message_text(text=f" you are interested in:{query.data}")
 
-
+    details.append(query.data)
+    update.message.reply_text(text=details)
 def help_command(update: Update, context: CallbackContext) -> None:
     """Displays info on how to use the bot."""
     update.message.reply_text("Use /start to test this bot.")
@@ -69,8 +71,7 @@ def main() -> None:
     # Start the Bot
     updater.start_polling()
 
-    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT
+
     updater.idle()
 
 
