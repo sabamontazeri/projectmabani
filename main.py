@@ -52,6 +52,19 @@ def button(update: Update, context: CallbackContext) -> None:
 def help_command(update: Update, context: CallbackContext) -> None:
     """Displays info on how to use the bot."""
     update.message.reply_text("Use /start to test this bot.")
+def listfilm(update: Update, context: CallbackContext):
+    import requests
+    from bs4 import BeautifulSoup
+    karbar=input().split()
+    page = requests.get(f'https://www.filimo.com/movies/comedy/iran')
+    soup = BeautifulSoup(page.text, 'html.parser')
+
+    movienames=[]
+    film=input()
+    b=soup.find_all('img',class_='ds-media_image lazyload lazyloading')
+    for item in b:
+        movienames.append(item['title'])
+    update.message.reply_text(text=movienames)
 
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
@@ -65,6 +78,7 @@ def main() -> None:
     updater.dispatcher.add_handler(CommandHandler('theme', theme))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
+    updater.dispatcher.add_handler(CommandHandler('listfilm',listfilm))
 
     # Start the Bot
     updater.start_polling()
