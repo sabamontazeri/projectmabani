@@ -7,7 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import re
 karbar=[]
-mylist=''
 first,second=range(2)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -74,74 +73,7 @@ def end(update: Update, context: CallbackContext):
         mylist+=f'{i} \n'
     update.message.reply_text(text=mylist)
 
-def button(update: Update, context: CallbackContext) -> None:
-    """Parses the CallbackQuery and updates the message text."""
-    query = update.callback_query
 
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    query.answer()
-
-    query.edit_message_text(text=f" you are interested in:{query.data}")
-    details.append(query.data)
-
-
-def help_command(update: Update, context: CallbackContext) -> None:
-    """Displays info on how to use the bot."""
-    update.message.reply_text("Use /start to test this bot.")
-def suggesting(update: Update, context: CallbackContext):
-
-    driver = webdriver.Chrome(executable_path='C:\\Users\\SABA\\Desktop\\chromedriver.exe')
-    driver.get(f'https://www.namava.ir/search?type={karbar[0]}&country={karbar[1]}&genre={karbar[2]}')
-
-    movienames = []
-    elements = driver.find_elements(By.TAG_NAME, 'img')
-
-    for element in elements:
-        movienames.append(element.get_attribute('title').strip())
-    print(movienames)
-
-    # poster link of the film:
-    x = movienames.index(film)
-    photo = elements[x].get_attribute('src')
-    print(photo)
-
-
-everylinks = []
-def linkfilm(driver, everylinks):
-    links = driver.find_elements(By.TAG_NAME, 'a')
-    for item in links:
-        eachlink = item.get_attribute('href')
-        everylinks.append(eachlink)
-    everylinks = everylinks[4:]
-    return everylinks
-
-
-def story(links):
-    eachlink = links[movienames.index(film)]
-    driver.get(eachlink)
-    content = driver.find_elements(By.CLASS_NAME, 'vertical-center')
-    try:
-        print(re.findall(".*\n", content[1].text)[2])
-    except:
-        pass
-
-
-
-def film_information(links):
-    eachlink = links[movienames.index(film)]
-    driver.get(eachlink)
-    content = driver.find_elements(By.CLASS_NAME, 'container')
-    if karbar[1] == '53':
-        try:
-            print(re.findall(".*\n", content[4].text)[1])
-        except:
-            pass
-    else:
-        try:
-            print(re.findall(".*\n", content[4].text)[2])
-        except:
-            pass
 
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
