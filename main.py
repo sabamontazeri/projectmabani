@@ -4,16 +4,8 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 import os
 
 details = []
-interest_list = []
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def list(update: Update, context: CallbackContext) -> None:
-    if len(interest_list) == 0:
-        update.message.reply_text('لیست علاقه مندی های شما خالی است')
-    else:
-        update.message.reply_text(interest_list[0])
 
 
 def type(update: Update, context: CallbackContext) -> None:
@@ -130,22 +122,11 @@ def inf(update: Update, context: CallbackContext) -> None:
             except:
                 pass
 
-    keyboard = [
-        [InlineKeyboardButton("افزودن به علاقه مندی ها", callback_data=film)]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     update.message.reply_text(text=f'{details[3]}:'
                               f'\n{story(links)}'
-                              f'\n{film_information(links)}', reply_markup=reply_markup)
+                              f'\n{film_information(links)}')
 
 
-def button_0(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-    query.answer()
-    query.edit_message_text(text=f" you are interested in:{query.data}")
-    interest_list.append(query.data)
 
 
 # def inf(update: Update, context: CallbackContext) -> None:
@@ -167,7 +148,6 @@ def main() -> None:
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
-    updater.dispatcher.add_handler(CommandHandler('list', list))
     updater.dispatcher.add_handler(CommandHandler('theme', theme))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('type', type))
@@ -175,14 +155,11 @@ def main() -> None:
     updater.dispatcher.add_handler(CommandHandler('items', items))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('inf', inf))
-    updater.dispatcher.add_handler(CallbackQueryHandler(button_0))
 
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
     # Start the Bot
-    updater.start_webhook(
-        listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url='https://pyth93bot.herokuapp.com/' + TOKEN
-    )
+    updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url='https://pyth93bot.herokuapp.com/' + TOKEN)
     updater.idle()
 
 from math import ceil
@@ -208,9 +185,9 @@ def items(update: Update, context: CallbackContext) -> None:
 
     x = ceil(len(movienames)/2)
     keyboard = []
-    for i in range(5): # for i in range(x)
+    for i in range(x):
         keyboard.append([])
-    for i in range(5): # for i in range(x)
+    for i in range(x):
         for j in range(2*i, 2*i+2):
             if j < 10: #len(movienames)
                 keyboard[i].append(InlineKeyboardButton(movienames[j], callback_data=movienames[j]))
