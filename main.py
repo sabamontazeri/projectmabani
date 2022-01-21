@@ -25,11 +25,6 @@ def sendmessage(chat_id, text):
     return response
 
 
-# data = get_all_updates()
-# lastupdate = get_last_update(data)
-# sendmessage(get_chat_id(lastupdate), 'khobam')
-# print()
-
 @app.route('/', methods=['POST', 'GET'])
 def index():
     msg = request.get_json()
@@ -69,9 +64,5 @@ def read_json(filename='contactlist.json'):
     return data
 
 
-# while True:
-#     a = get_last_update(get_all_updates())
-#     if a['message']['text'] == 'salam':
-#         sendmessage(get_chat_id(a), 'salam. khobi?')
 write_json({})
 app.run(host='0.0.0.0',port=int(os.environ.get('PORT', 5000)))
