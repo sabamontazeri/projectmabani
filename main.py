@@ -43,3 +43,12 @@ def story(eachlink):
 
 story(eachlink)
 
+
+def actors(eachlink):
+    link = requests.get('https://30nama.com' + eachlink)
+    soups = BeautifulSoup(link.text, 'html.parser')
+    actors = soups.find_all('h5', class_="bd-sm")
+    if actors != []:
+        for i in range(0, len(actors), 2):
+            print(re.findall('.*\n', actors[i].text)[1].strip())
+actors(eachlink)
