@@ -33,3 +33,13 @@ print(movienames(links))
 
 
 eachlink = links[movienames(links).index(film)]
+
+def story(eachlink):
+    link = requests.get('https://30nama.com' + eachlink)
+    soups = BeautifulSoup(link.text, 'html.parser')
+    stories = soups.find_all('div', class_='content')
+    if not stories == []:
+        print(stories[2].text.strip())
+
+story(eachlink)
+
