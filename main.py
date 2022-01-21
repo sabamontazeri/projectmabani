@@ -17,6 +17,11 @@ for element in elements:
     movienames.append(element.get_attribute('title').strip())
 print(movienames)
 
+# poster link of the film:
+x = movienames.index(film)
+photo = elements[x].get_attribute('src')
+print(photo)
+
 
 everylinks = []
 def linkfilm(driver, everylinks):
