@@ -4,8 +4,16 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 import os
 
 details = []
+interest_list = []
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def list(update: Update, context: CallbackContext) -> None:
+    if len(interest_list) == 0:
+        update.message.reply_text('لیست علاقه مندی های شما خالی است')
+    else:
+        update.message.reply_text(interest_list[0])
 
 
 def type(update: Update, context: CallbackContext) -> None:
@@ -65,7 +73,12 @@ def button(update: Update, context: CallbackContext) -> None:
     # update.message.reply_text(text=details)
 
 def inf(update: Update, context: CallbackContext) -> None:
-    driver = webdriver.Firefox()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
     driver.get(f'https://www.namava.ir/search?type={details[2]}&country={details[0]}&genre={details[1]}')
 
     movienames = []
@@ -117,11 +130,28 @@ def inf(update: Update, context: CallbackContext) -> None:
             except:
                 pass
 
+    keyboard = [
+        [InlineKeyboardButton("افزودن به علاقه مندی ها", callback_data=film)]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     update.message.reply_text(text=f'{details[3]}:'
                               f'\n{story(links)}'
-                              f'\n{film_information(links)}')
+                              f'\n{film_information(links)}', reply_markup=reply_markup)
 
 
+def button_0(update: Update, context: CallbackContext) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
+
+    query.edit_message_text(text=f" you are interested in:{query.data}")
+
+    interest_list.append(query.data)
 
 
 # def inf(update: Update, context: CallbackContext) -> None:
@@ -150,11 +180,15 @@ def main() -> None:
     updater.dispatcher.add_handler(CommandHandler('items', items))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('inf', inf))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button_0))
+    updater.dispatcher.add_handler(CommandHandler('list', list))
 
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
     # Start the Bot
-    updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url='https://pyth93bot.herokuapp.com/' + TOKEN)
+    updater.start_webhook(
+        listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url='https://pyth93bot.herokuapp.com/' + TOKEN
+    )
     updater.idle()
 
 from math import ceil
@@ -163,7 +197,12 @@ from selenium.webdriver.common.by import By
 import re
 
 def items(update: Update, context: CallbackContext) -> None:
-    driver = webdriver.Firefox()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
     driver.get(f'https://www.namava.ir/search?type={details[2]}&country={details[0]}&genre={details[1]}')
 
     movienames = []
@@ -175,9 +214,9 @@ def items(update: Update, context: CallbackContext) -> None:
 
     x = ceil(len(movienames)/2)
     keyboard = []
-    for i in range(x):
+    for i in range(5): # for i in range(x)
         keyboard.append([])
-    for i in range(x):
+    for i in range(5): # for i in range(x)
         for j in range(2*i, 2*i+2):
             if j < 10: #len(movienames)
                 keyboard[i].append(InlineKeyboardButton(movienames[j], callback_data=movienames[j]))
