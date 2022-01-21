@@ -65,7 +65,7 @@ def button(update: Update, context: CallbackContext) -> None:
     # update.message.reply_text(text=details)
 
 def inf(update: Update, context: CallbackContext) -> None:
-    driver = webdriver.Firefox(executable_path='C:\\Users\\Sportg\\Desktop\\geckodriver.exe')
+    driver = webdriver.Firefox()
     driver.get(f'https://www.namava.ir/search?type={details[2]}&country={details[0]}&genre={details[1]}')
 
     movienames = []
