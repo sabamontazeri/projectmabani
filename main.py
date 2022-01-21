@@ -52,3 +52,14 @@ def actors(eachlink):
         for i in range(0, len(actors), 2):
             print(re.findall('.*\n', actors[i].text)[1].strip())
 actors(eachlink)
+
+print()
+def crews(eachlink):
+    link = requests.get('https://30nama.com' + eachlink)
+    soups = BeautifulSoup(link.text, 'html.parser')
+    crews = soups.find_all('a', class_="child-link")
+    if crews != []:
+        print(re.findall('.*\n', crews[8].text)[1].strip())
+        print(re.findall('.*\n', crews[len(crews)-1].text)[1].strip())
+
+crews(eachlink)
