@@ -63,3 +63,11 @@ def crews(eachlink):
         print(re.findall('.*\n', crews[len(crews)-1].text)[1].strip())
 
 crews(eachlink)
+
+
+def photourl(eachlink):
+    link = requests.get('https://30nama.com' + eachlink)
+    soups = BeautifulSoup(link.text, 'html.parser')
+    photo = soups.find_all('img', class_="main-cover lazyload-title")
+    print(photo[0]['src'])
+photourl(eachlink)
