@@ -1,6 +1,7 @@
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, Bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext
+import os
 
 details = []
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -134,6 +135,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 TOKEN="5063146076:AAHxSfqMCw4VCwOH4KkvYEiCixtUBpiw9-I"
 bot=Bot(token=TOKEN)
+PORT = int(os.environ.get('PORT', '8443'))
 def main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
@@ -151,12 +153,8 @@ def main() -> None:
 
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
-    app = logger
-
     # Start the Bot
-    updater.start_polling()
-
-
+    updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url='https://pyth93bot.herokuapp.com/' + TOKEN)
     updater.idle()
 
 from math import ceil
