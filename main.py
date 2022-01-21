@@ -10,6 +10,7 @@ film = input()
 
 
 everylinks=[]
+# movie links:
 def linkfilm(soup, everylinks):
     links = soup.find_all('a', draggable='false')
     for i in range(len(links)):
@@ -19,7 +20,7 @@ def linkfilm(soup, everylinks):
 links = linkfilm(soup, everylinks)
 
 
-
+# movie names:
 def movienames(links):
     movie = []
     links = links[:10]
@@ -34,6 +35,7 @@ print(movienames(links))
 
 eachlink = links[movienames(links).index(film)]
 
+# story of the movie:
 def story(eachlink):
     link = requests.get('https://30nama.com' + eachlink)
     soups = BeautifulSoup(link.text, 'html.parser')
@@ -43,7 +45,7 @@ def story(eachlink):
 
 story(eachlink)
 
-
+# actors' names:
 def actors(eachlink):
     link = requests.get('https://30nama.com' + eachlink)
     soups = BeautifulSoup(link.text, 'html.parser')
@@ -54,6 +56,8 @@ def actors(eachlink):
 actors(eachlink)
 
 print()
+
+# writer and creator:
 def crews(eachlink):
     link = requests.get('https://30nama.com' + eachlink)
     soups = BeautifulSoup(link.text, 'html.parser')
@@ -64,10 +68,3 @@ def crews(eachlink):
 
 crews(eachlink)
 
-
-def photourl(eachlink):
-    link = requests.get('https://30nama.com' + eachlink)
-    soups = BeautifulSoup(link.text, 'html.parser')
-    photo = soups.find_all('img', class_="main-cover lazyload-title")
-    print(photo[0]['src'])
-photourl(eachlink)
