@@ -17,6 +17,7 @@ for element in elements:
     movienames.append(element.get_attribute('title').strip())
 print(movienames)
 
+
 everylinks = []
 def linkfilm(driver, everylinks):
     links = driver.find_elements(By.TAG_NAME, 'a')
@@ -37,3 +38,20 @@ def story(links):
     except:
         pass
 story(links)
+
+
+def film_information(links):
+    eachlink = links[movienames.index(film)]
+    driver.get(eachlink)
+    content = driver.find_elements(By.CLASS_NAME, 'container')
+    if karbar[1] == '53':
+        try:
+            print(re.findall(".*\n", content[4].text)[1])
+        except:
+            pass
+    else:
+        try:
+            print(re.findall(".*\n", content[4].text)[2])
+        except:
+            pass
+film_information(links)
