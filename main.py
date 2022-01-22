@@ -4,7 +4,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Callback
 import requests
 import re
 from bs4 import BeautifulSoup
-
+import os
 global xt
 xt=''
 global fave
@@ -78,24 +78,23 @@ def end(update: Update, context: CallbackContext):
     karbar.append(query.data)
     update.callback_query.message.edit_text(text="ژانر مورد نظر شما انتخاب شد")
 def button(update: Update, context: CallbackContext) -> None:
-    global film
     """Parses the CallbackQuery and updates the message text."""
     query = update.callback_query
-
+    global film
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
 
-    query.edit_message_text(text=f"گزینه مورد نظر: {query.data}")
-    global fl
-    global film
+    query.edit_message_text(text=f"گزینه مورد نظر شما انتخاب شد ")
     fl=query.data
-    if not fl.isalpha():
+    if fl!='2' and  fl!='1':
         film=fl
+        print(film)
     else:
-        if fl=='yes':
+        if fl=='1':
             if film not in dict[chat_id]:
                 dict[chat_id].append(film)
+
 
 
 
@@ -110,7 +109,7 @@ def list(update: Update, context: CallbackContext) -> None:
     for item in b:
         movienames.append(item['title'])
     movienames = movienames[3:13]
-
+    print(movienames)
 
     keyboard = []
     for i in range(5):
@@ -138,7 +137,7 @@ def list(update: Update, context: CallbackContext) -> None:
             linkss.append(i)
     linkss=linkss[3:13]
     return fourth
-
+    print(linkss)
 def story(update: Update, context: CallbackContext):
     eachlink=linkss[movienames.index(film)]
     link=requests.get(eachlink)
@@ -146,7 +145,7 @@ def story(update: Update, context: CallbackContext):
     stories=soups.find_all('p',class_='toTruncate ps-relative short-description')
     if not stories==[] :
         s=stories[0]
-        keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
+        keyboard = [[InlineKeyboardButton("👍", callback_data='1'), InlineKeyboardButton("👎", callback_data='2')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text(text=s.text,reply_markup=reply_markup)
 
@@ -170,7 +169,7 @@ def actors(update: Update, context: CallbackContext):
         string_without_empty_lines += line + "\n"
 
     print(string_without_empty_lines)
-    keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
+    keyboard = [[InlineKeyboardButton("👍", callback_data='1'), InlineKeyboardButton("👎", callback_data='2')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(text=string_without_empty_lines,reply_markup=reply_markup)
 def crews(update: Update, context: CallbackContext):
@@ -200,7 +199,7 @@ def photourl(update: Update, context: CallbackContext):
     soups = BeautifulSoup(link.text, 'html.parser')
     photos = soups.find_all('img', class_="ds-media_image lazyload lazyloading")
     print(photos[0]['data-src'])
-    keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
+    keyboard = [[InlineKeyboardButton("👍", callback_data='1'), InlineKeyboardButton("👎", callback_data='2')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.sendPhoto(chat_id=chat_id,photo=photos[0]['data-src'],caption='پوستر فیلم مورد نظر شما📺:')
     update.message.reply_text('آیا این فیلم را می پسندید؟', reply_markup=reply_markup)
@@ -228,7 +227,7 @@ def butt(update: Update, context: CallbackContext):
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
     answ=query.data
-    if answ=='yes':
+    if answ=='1':
         fave.append(film)
     else:
         pass
@@ -238,6 +237,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
 karbar=[]
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
+PORT = int(os.environ.get('PORT', '8443'))
 def main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
@@ -265,19 +265,24 @@ def main() -> None:
     updater.dispatcher.add_handler(CommandHandler('end', end))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('story', story))
-    updater.dispatcher.add_handler(CallbackQueryHandler(butt))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('photourl',photourl))
-
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('actors', actors))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('crews', crews))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('favorite', favorite))
-
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('showlist', showlist))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
     # Start the Bot
     updater.start_polling()
-
+    # Start the Bot
+    updater.start_webhook(
+        listen='0.0.0.0', port=PORT, url_path=TOKEN, webhook_url=' https://telegrambotiust.herokuapp.com/' + TOKEN
+    )
     # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT
     updater.idle()
