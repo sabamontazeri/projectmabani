@@ -89,7 +89,6 @@ def button(update: Update, context: CallbackContext) -> None:
     fl=query.data
     if fl!='2' and  fl!='1':
         film=fl
-        print(film)
     else:
         if fl=='1':
             if film not in dict[chat_id]:
@@ -109,7 +108,6 @@ def list(update: Update, context: CallbackContext) -> None:
     for item in b:
         movienames.append(item['title'])
     movienames = movienames[3:13]
-    print(movienames)
 
     keyboard = []
     for i in range(5):
@@ -137,7 +135,6 @@ def list(update: Update, context: CallbackContext) -> None:
             linkss.append(i)
     linkss=linkss[3:13]
     return fourth
-    print(linkss)
 def story(update: Update, context: CallbackContext):
     eachlink=linkss[movienames.index(film)]
     link=requests.get(eachlink)
@@ -168,7 +165,6 @@ def actors(update: Update, context: CallbackContext):
     for line in non_empty_lines:
         string_without_empty_lines += line + "\n"
 
-    print(string_without_empty_lines)
     keyboard = [[InlineKeyboardButton("👍", callback_data='1'), InlineKeyboardButton("👎", callback_data='2')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(text=string_without_empty_lines,reply_markup=reply_markup)
@@ -198,7 +194,6 @@ def photourl(update: Update, context: CallbackContext):
     link = requests.get(eachlink)
     soups = BeautifulSoup(link.text, 'html.parser')
     photos = soups.find_all('img', class_="ds-media_image lazyload lazyloading")
-    print(photos[0]['data-src'])
     keyboard = [[InlineKeyboardButton("👍", callback_data='1'), InlineKeyboardButton("👎", callback_data='2')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.sendPhoto(chat_id=chat_id,photo=photos[0]['data-src'],caption='پوستر فیلم مورد نظر شما📺:')
@@ -274,7 +269,6 @@ def main() -> None:
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('favorite', favorite))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
-    updater.dispatcher.add_handler(CommandHandler('showlist', showlist))
     updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
     # Start the Bot
