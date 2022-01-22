@@ -2,29 +2,31 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update,Bot
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, CallbackContext,ConversationHandler
 import requests
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 import re
-import os
-mylist=''
-karbar=[]
-first,second,third=range(3)
+from bs4 import BeautifulSoup
+
+global xt
+xt=''
+global fave
+fave=[]
+first,second,third,fourth,five=range(5)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext) -> None:
+    global karbar
+    karbar = []
     """Sends a message with three inline buttons attached."""
     bot_welcome = f'/help خوش آمدید.این ربات برای پیدا کردن فیلم مورد علاقه شما طراحی شده است. برای دیدن دستورالعمل این ربات از دستور مقابل استفاده کنید: '
 
     update.message.reply_text(text=bot_welcome)
     keyboard = [
         [
-            InlineKeyboardButton("سریال ", callback_data='series')
+            InlineKeyboardButton("لیست علاقه مندی ها ", callback_data='favorite')
         ],
-        [InlineKeyboardButton("فیلم", callback_data='movie')]
+        [InlineKeyboardButton("فیلم و سریال", callback_data='movie')]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -37,61 +39,198 @@ def country(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     keyboard=[[
-            InlineKeyboardButton("ایران🇮🇷 ", callback_data='53'),
-            InlineKeyboardButton("آمریکا🇱🇷", callback_data='54'),
-        ],
-        [InlineKeyboardButton("هند🇮🇳", callback_data='59'),
-         InlineKeyboardButton("سایر🌐", callback_data='63')],]
+            InlineKeyboardButton("ایران🇮🇷 ", callback_data='53')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
 
     query.edit_message_text(text="به سینمای کدام کشور علاقه دارید؟",reply_markup=reply_markup)
     karbar.append(query.data)
-    return second
+    return third
 
 def theme(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("کمدی", callback_data='کمدی'),
-            InlineKeyboardButton("اکشن", callback_data='اکشن'),
+            InlineKeyboardButton("کمدی", callback_data='comedy'),
+            InlineKeyboardButton("اکشن", callback_data='action'),
         ],
-        [InlineKeyboardButton("ترسناک", callback_data='ترسناک'),InlineKeyboardButton("درام",callback_data='درام')],
-        [InlineKeyboardButton("جنگی", callback_data='جنگی'),InlineKeyboardButton("عاشقانه",callback_data='عاشقانه')],
+        [InlineKeyboardButton("ترسناک", callback_data='horror'),InlineKeyboardButton("خانوادگی",callback_data='family')],
+        [InlineKeyboardButton("مستند", callback_data='documentary'),InlineKeyboardButton("عاشقانه",callback_data='romance')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     query.edit_message_text(text="به کدام ژانر علاقه دارید؟🎭",reply_markup=reply_markup)
     karbar.append(query.data)
-    return third
+    return second
 
 def end(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     karbar.append(query.data)
     update.callback_query.message.edit_text(text="ژانر مورد نظر شما انتخاب شد")
+def button(update: Update, context: CallbackContext) -> None:
+    global film
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
 
-def inf(update: Update, context: CallbackContext) -> None:
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
-    driver.get(f'https://www.namava.ir/search?type={karbar[0]}&country={karbar[1]}&genre={karbar[2]}')
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
 
-    movienames = []
-    elements = driver.find_elements(By.TAG_NAME, 'img')
-
-    for element in elements:
-        movienames.append(element.get_attribute('title').strip())
-    for i in movienames:
-        text+=f'{i}\n'
-    update.message.reply_text(text=text)
+    query.edit_message_text(text=f"گزینه مورد نظر: {query.data}")
+    global fl
+    global film
+    fl=query.data
+    if not fl.isalpha():
+        film=fl
+    else:
+        if fl=='yes':
+            if film not in fave:
+                fave.append(film)
+        print(fave)
 
 
 
+def list(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    global movienames
+    page = requests.get(f'https://www.televika.com/tag/{karbar[1]}')
+    soup = BeautifulSoup(page.text, 'html.parser')
+    movienames=[]
+    b=soup.find_all('img',class_='ds-media_image lazyload lazyloading')
+    for item in b:
+        movienames.append(item['title'])
+    movienames = movienames[3:13]
+
+
+    keyboard = []
+    for i in range(5):
+        keyboard.append([])
+    for i in range(5):
+        for j in range(2 * i, 2 * i + 2):
+            if j < 10:
+                try:
+                    keyboard[i].append(InlineKeyboardButton(movienames[j], callback_data=movienames[j]))
+                except:
+                    pass
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    query.edit_message_text('یک فیلم را انتخاب کنید:', reply_markup=reply_markup)
+    global everylinks
+    global linkss
+    linkss=[]
+    everylinks=[]
+    links=soup.find_all('a',class_='overlay--transparent')
+    for i in range(len(links)):
+        eachlink=links[i]['href']
+        everylinks.append(eachlink)
+    for i in everylinks:
+        if i not in linkss:
+            linkss.append(i)
+    linkss=linkss[3:13]
+    print(karbar)
+    return fourth
+
+def story(update: Update, context: CallbackContext):
+    eachlink=linkss[movienames.index(film)]
+    link=requests.get(eachlink)
+    soups=BeautifulSoup(link.text,'html.parser')
+    stories=soups.find_all('p',class_='toTruncate ps-relative short-description')
+    if not stories==[] :
+        s=stories[0]
+        keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text(text=s.text,reply_markup=reply_markup)
+
+
+
+
+def actors(update: Update, context: CallbackContext):
+    eachlink=linkss[movienames.index(film)]
+    link=requests.get(eachlink)
+    soups=BeautifulSoup(link.text,'html.parser')
+    actors=soups.find_all('div',class_="actors-item is-iran")
+    x=''
+    for item in actors:
+        if not item.text=='':
+            x+=f'{item.text}\n'
+    lines = x.split("\n")
+    non_empty_lines = [line for line in lines if line.strip() != ""]
+
+    string_without_empty_lines = ""
+    for line in non_empty_lines:
+        string_without_empty_lines += line + "\n"
+
+    print(string_without_empty_lines)
+    keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(text=string_without_empty_lines,reply_markup=reply_markup)
+def crews(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    eachlink=linkss[movienames.index(film)]
+    link=requests.get(eachlink)
+    soups=BeautifulSoup(link.text,'html.parser')
+    crews=soups.find_all('div',class_="other-crew_img")
+    jobs=soups.find_all('h3',class_="crew-title other-crew_name truncate")
+    mytext=''
+    listt=[]
+    for job in jobs:
+        listt.append(job.text)
+    for div in crews:
+        for img in div.find_all('img', alt=True):
+            t=img['alt']
+            listt.append(t)
+    for i in range(int(len(listt)*0.5)):
+        mytext+=f'{listt[i]}:{listt[i+int(len(listt)*0.5)]}\n'
+    bot.send_message(chat_id=chat_id,text=mytext)
+
+
+def photourl(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    eachlink = linkss[movienames.index(film)]
+    link = requests.get(eachlink)
+    soups = BeautifulSoup(link.text, 'html.parser')
+    photos = soups.find_all('img', class_="ds-media_image lazyload lazyloading")
+    print(photos[0]['data-src'])
+    keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot.sendPhoto(chat_id=chat_id,photo=photos[0]['data-src'],caption='پوستر فیلم مورد نظر شما📺:')
+    update.message.reply_text('آیا این فیلم را می پسندید؟', reply_markup=reply_markup)
+def favorite(update: Update, context: CallbackContext):
+    keyboard=[[InlineKeyboardButton("yes", callback_data='yes'),InlineKeyboardButton("no", callback_data='no')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('آیا این فیلم را می پسندید؟', reply_markup=reply_markup)
+
+    fave.append(film)
+def showlist(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+    text=''
+    if fave==[]:
+        query.edit_message_text(text=f"در حال حاضر فیلم مورد علاقه ای ندارید")
+    else:
+        for i in fave:
+            text+=f'{i}\n'
+        query.edit_message_text(text=text)
+
+def butt(update: Update, context: CallbackContext):
+    query = update.callback_query
+
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
+    answ=query.data
+    if answ=='yes':
+        fave.append(film)
+    else:
+        pass
+    print(query.data)
+def help_command(update: Update, context: CallbackContext) -> None:
+    """Displays info on how to use the bot."""
+    update.message.reply_text("/photourl پوستر را به شما میدهد\n/story داستان را به شما میدهد\n/crews عوامل را به شما میدهد\n /actors پوستر را به شما میدهد\n /showlist لیست علاقه مندی را به شما میدهد")
+karbar=[]
 TOKEN="5032556012:AAG0qZfT01Ni1-WNGh0AaIFVfndw9axhe0c"
 bot=Bot(token=TOKEN)
 def main() -> None:
@@ -102,25 +241,33 @@ def main() -> None:
 
     conv_handler=ConversationHandler(
         entry_points=[CommandHandler('start',start)],
-        states={first:[CallbackQueryHandler(country,pattern='^' + 'series' + '$'),
-                 CallbackQueryHandler(country,pattern='^' + 'movie' + '$')],
-                 second:[CallbackQueryHandler(theme,pattern='^' + '53' + '$'),
-                         CallbackQueryHandler(theme,pattern='^' + '54' + '$'),
-                         CallbackQueryHandler(theme,pattern='^' + '59' + '$'),
-                         CallbackQueryHandler(theme,pattern='^' + '63' + '$')],
-                 third:[CallbackQueryHandler(end,'^' + 'کمدی' + '$'),
-                        CallbackQueryHandler(end,'^' + 'ترسناک' + '$'),
-                        CallbackQueryHandler(end,'^' + 'جنگی' + '$'),
-                        CallbackQueryHandler(end,'^' + 'درام' + '$'),
-                        CallbackQueryHandler(end,'^' + 'عاشقانه' + '$'),
-                        CallbackQueryHandler(end,'^' + 'اکشن' + '$')]
+        states={first:[CallbackQueryHandler(theme,pattern='^' + 'movie' + '$'),
+                 CallbackQueryHandler(showlist,pattern='^' + 'favorite' + '$')],
+                 second:[    CallbackQueryHandler(country, '^' + 'کمدی' + '$'),
+                            CallbackQueryHandler(country, '^' + 'ترسناک' + '$'),
+                            CallbackQueryHandler(country, '^' + 'جنگی' + '$'),
+                            CallbackQueryHandler(country, '^' + 'درام' + '$'),
+                            CallbackQueryHandler(country, '^' + 'عاشقانه' + '$'),
+                            CallbackQueryHandler(country, '^' + 'اکشن' + '$')],
+                 third:[CallbackQueryHandler(list,pattern='^' + '53' + '$')],
 
         },
     fallbacks = [CommandHandler('start', start)]
     )
     dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CommandHandler('end', end))
-    updater.dispatcher.add_handler(CommandHandler('inf', inf))
+
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CommandHandler('story', story))
+    updater.dispatcher.add_handler(CallbackQueryHandler(butt))
+    updater.dispatcher.add_handler(CommandHandler('photourl',photourl))
+
+    updater.dispatcher.add_handler(CommandHandler('actors', actors))
+    updater.dispatcher.add_handler(CommandHandler('crews', crews))
+    updater.dispatcher.add_handler(CommandHandler('favorite', favorite))
+
+    updater.dispatcher.add_handler(CommandHandler('showlist', showlist))
+    updater.dispatcher.add_handler(CommandHandler('help', help_command))
 
     # Start the Bot
     updater.start_polling()
