@@ -9,6 +9,8 @@ global xt
 xt=''
 global fave
 fave=[]
+global dict
+dict = {}
 first,second,third,fourth,five=range(5)
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -17,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 def start(update: Update, context: CallbackContext) -> None:
     global karbar
+    global chat_id
+    chat_id=update.message.chat_id
+    if chat_id not in dict.keys():
+        dict[chat_id]=[]
     karbar = []
     """Sends a message with three inline buttons attached."""
     bot_welcome = f'/help خوش آمدید.این ربات برای پیدا کردن فیلم مورد علاقه شما طراحی شده است. برای دیدن دستورالعمل این ربات از دستور مقابل استفاده کنید: '
@@ -31,7 +37,7 @@ def start(update: Update, context: CallbackContext) -> None:
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text('فیلم یا سریال؟🎥', reply_markup=reply_markup)
+    update.message.reply_text('گزینه مورد نظر شما کدام است؟🎥', reply_markup=reply_markup)
 
     return first
 
@@ -57,6 +63,8 @@ def theme(update: Update, context: CallbackContext) -> None:
         ],
         [InlineKeyboardButton("ترسناک", callback_data='horror'),InlineKeyboardButton("خانوادگی",callback_data='family')],
         [InlineKeyboardButton("مستند", callback_data='documentary'),InlineKeyboardButton("عاشقانه",callback_data='romance')],
+        [InlineKeyboardButton("انیمیشن", callback_data='animated'),
+         InlineKeyboardButton("تاریخی", callback_data='historic')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -86,9 +94,8 @@ def button(update: Update, context: CallbackContext) -> None:
         film=fl
     else:
         if fl=='yes':
-            if film not in fave:
-                fave.append(film)
-        print(fave)
+            if film not in dict[chat_id]:
+                dict[chat_id].append(film)
 
 
 
@@ -130,7 +137,6 @@ def list(update: Update, context: CallbackContext) -> None:
         if i not in linkss:
             linkss.append(i)
     linkss=linkss[3:13]
-    print(karbar)
     return fourth
 
 def story(update: Update, context: CallbackContext):
@@ -140,7 +146,7 @@ def story(update: Update, context: CallbackContext):
     stories=soups.find_all('p',class_='toTruncate ps-relative short-description')
     if not stories==[] :
         s=stories[0]
-        keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+        keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text(text=s.text,reply_markup=reply_markup)
 
@@ -164,7 +170,7 @@ def actors(update: Update, context: CallbackContext):
         string_without_empty_lines += line + "\n"
 
     print(string_without_empty_lines)
-    keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+    keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(text=string_without_empty_lines,reply_markup=reply_markup)
 def crews(update: Update, context: CallbackContext):
@@ -194,7 +200,7 @@ def photourl(update: Update, context: CallbackContext):
     soups = BeautifulSoup(link.text, 'html.parser')
     photos = soups.find_all('img', class_="ds-media_image lazyload lazyloading")
     print(photos[0]['data-src'])
-    keyboard = [[InlineKeyboardButton("👍", callback_data='yes'), InlineKeyboardButton("👎", callback_data='no')]]
+    keyboard = [[InlineKeyboardButton("👍", callback_data='👍'), InlineKeyboardButton("👎", callback_data='👎')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.sendPhoto(chat_id=chat_id,photo=photos[0]['data-src'],caption='پوستر فیلم مورد نظر شما📺:')
     update.message.reply_text('آیا این فیلم را می پسندید؟', reply_markup=reply_markup)
@@ -203,15 +209,15 @@ def favorite(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('آیا این فیلم را می پسندید؟', reply_markup=reply_markup)
 
-    fave.append(film)
+    dict[chat_id].append(film)
 def showlist(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     text=''
-    if fave==[]:
+    if dict[chat_id]==[]:
         query.edit_message_text(text=f"در حال حاضر فیلم مورد علاقه ای ندارید")
     else:
-        for i in fave:
+        for i in dict[chat_id]:
             text+=f'{i}\n'
         query.edit_message_text(text=text)
 
@@ -226,7 +232,6 @@ def butt(update: Update, context: CallbackContext):
         fave.append(film)
     else:
         pass
-    print(query.data)
 def help_command(update: Update, context: CallbackContext) -> None:
     """Displays info on how to use the bot."""
     update.message.reply_text("/photourl پوستر را به شما میدهد\n/story داستان را به شما میدهد\n/crews عوامل را به شما میدهد\n /actors پوستر را به شما میدهد\n /showlist لیست علاقه مندی را به شما میدهد")
@@ -243,12 +248,14 @@ def main() -> None:
         entry_points=[CommandHandler('start',start)],
         states={first:[CallbackQueryHandler(theme,pattern='^' + 'movie' + '$'),
                  CallbackQueryHandler(showlist,pattern='^' + 'favorite' + '$')],
-                 second:[    CallbackQueryHandler(country, '^' + 'کمدی' + '$'),
-                            CallbackQueryHandler(country, '^' + 'ترسناک' + '$'),
-                            CallbackQueryHandler(country, '^' + 'جنگی' + '$'),
-                            CallbackQueryHandler(country, '^' + 'درام' + '$'),
-                            CallbackQueryHandler(country, '^' + 'عاشقانه' + '$'),
-                            CallbackQueryHandler(country, '^' + 'اکشن' + '$')],
+                 second:[    CallbackQueryHandler(country, '^' + 'comedy' + '$'),
+                            CallbackQueryHandler(country, '^' + 'horror' + '$'),
+                            CallbackQueryHandler(country, '^' + 'documentary' + '$'),
+                            CallbackQueryHandler(country, '^' + 'family' + '$'),
+                            CallbackQueryHandler(country, '^' + 'romance' + '$'),
+                            CallbackQueryHandler(country, '^' + 'action' + '$'),
+                             CallbackQueryHandler(country, '^' + 'animated' + '$'),
+                             CallbackQueryHandler(country, '^' + 'historic' + '$')],
                  third:[CallbackQueryHandler(list,pattern='^' + '53' + '$')],
 
         },
@@ -256,7 +263,6 @@ def main() -> None:
     )
     dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_handler(CommandHandler('end', end))
-
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_handler(CommandHandler('story', story))
     updater.dispatcher.add_handler(CallbackQueryHandler(butt))
